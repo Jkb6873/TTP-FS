@@ -83,8 +83,8 @@ def register():
     # if email_taken:
     #     return "This email is already taken"
 
-    newTech = User(name=params['Name'], email=params['Email'], password=params['Password'])
-    db.session.add(newTech)
+    newUser = User(name=params['Name'], email=params['Email'], password=params['Password'])
+    db.session.add(newUser)
     db.session.commit()
 
 
