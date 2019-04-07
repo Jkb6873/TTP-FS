@@ -16,7 +16,7 @@ SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
 
 app = Flask(__name__)
 app.secret_key = APP_SECRET
-app.config
+app.config.SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI
 db = SQLAlchemy(app)
 
 class User(db.Model):
