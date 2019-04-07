@@ -77,7 +77,7 @@ def register():
     #error in case the email, name or password is too long or empty
     for param in params:
         if not params[param] or len(params[param]) > 64:
-            return "{} is of incorrect format".format(params[param])
+            return "{} is of incorrect format".format(param)
 
     # error in the case that the email is taken
     email_taken = db.session.query(exists().where(User.email == params['Email'])).scalar()
