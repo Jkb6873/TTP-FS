@@ -31,7 +31,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=False, nullable=False)
     email = db.Column(db.String(64), unique=True, nullable=False)
-    key = db.Column(db.String(64), unique=True, nullable=False)
+    key = db.Column(db.String(256), unique=True, nullable=False)
     funds = db.Column(db.Numeric(precision=2, asdecimal=True), unique=False, nullable=False)
 
 
