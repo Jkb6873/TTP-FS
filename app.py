@@ -28,7 +28,7 @@ class User(db.Model):
         self.email = email
         self.funds = 5000.00
 
-    __tablename__ = "User"
+    __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=False, nullable=False)
     email = db.Column(db.String(64), unique=True, nullable=False)
