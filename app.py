@@ -28,6 +28,7 @@ class User(db.Model):
         self.email = email
         funds = 5000.00
 
+    __tablename__ = "User"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), unique=False, nullable=False)
     email = db.Column(db.String(64), unique=True, nullable=False)
@@ -86,7 +87,3 @@ def register():
     newUser = User(name=params['Name'], email=params['Email'], password=params['Password'])
     db.session.add(newUser)
     db.session.commit()
-
-
-# if __name__ == '__main__':
-#     application.run()
