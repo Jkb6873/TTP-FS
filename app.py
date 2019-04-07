@@ -80,7 +80,7 @@ def register():
             return "{} is of incorrect format".format(params[param])
 
     # error in the case that the email is taken
-    email_taken = db.session.query(exists().where(User.email == email)).scalar()
+    email_taken = db.session.query(exists().where(User.email == params['Email'])).scalar()
     if email_taken:
         return "This email is already taken"
 
