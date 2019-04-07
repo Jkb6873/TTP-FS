@@ -87,3 +87,4 @@ def register():
     newUser = User(name=params['Name'], email=params['Email'], password=params['Password'])
     db.session.add(newUser)
     db.session.commit()
+    return "Account successfully created"
