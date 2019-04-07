@@ -14,10 +14,10 @@ GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 APP_SECRET = os.environ.get("APP_SECRET")
 SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
 
-app = Flask(__name__)
-app.secret_key = APP_SECRET
-app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
-db = SQLAlchemy(app)
+application = Flask(__name__)
+application.secret_key = APP_SECRET
+application.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
+db = SQLAlchemy(application)
 
 class User(db.Model):
     def __init__(self, name, email, password):
@@ -46,7 +46,7 @@ google_blueprint = make_google_blueprint(
     #Uses the offline access to automatically refresh the authorization session
     reprompt_consent=True
 )
-app.register_blueprint(google_blueprint, url_prefix="/login")
+application.register_blueprint(google_blueprint, url_prefix="/login")
 
 
 
@@ -66,7 +66,7 @@ def validate_login(func):
     wrapper.func_name = func.func_name
     return wrapper
 
-@app.route('/register', methods=['GET','POST'])
+@application.route('/register', methods=['GET','POST'])
 def register():
     params = {
         'Name': request.args.get('name', ''),
@@ -88,5 +88,5 @@ def register():
     db.session.commit()
 
 
-if __name__ == '__main__':
-    app.run()
+# if __name__ == '__main__':
+#     application.run()
