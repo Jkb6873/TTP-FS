@@ -67,7 +67,7 @@ def validate_login(func):
     wrapper.func_name = func.func_name
     return wrapper
 
-@application.route('/register', methods=['GET','POST'])
+@application.route('/register', methods=['POST'])
 def register():
     params = {
         'Name': request.args.get('name', ''),
@@ -79,10 +79,10 @@ def register():
         if not params[param] or len(params[param]) > 64:
             return "{} is of incorrect format".format(params[param])
 
-    #error in the case that the email is taken
-    # email_taken = db.session.query(exists().where(User.email == email)).scalar()
-    # if email_taken:
-    #     return "This email is already taken"
+    # error in the case that the email is taken
+    email_taken = db.session.query(exists().where(User.email == email)).scalar()
+    if email_taken:
+        return "This email is already taken"
 
     newUser = User(name=params['Name'], email=params['Email'], password=params['Password'])
     db.session.add(newUser)
