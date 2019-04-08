@@ -1,8 +1,10 @@
 import os
 import bcrypt
 import hashlib
+import datetime
+import jwt
 
-from flask import Flask, request
+from flask import Flask, request, session
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text, or_, func, and_
@@ -36,36 +38,80 @@ class User(db.Model):
     funds = db.Column(db.Numeric(precision=2, asdecimal=True), unique=False, nullable=False)
 
 
-google_blueprint = make_google_blueprint(
-    client_id=GOOGLE_CLIENT_ID,
-    client_secret=GOOGLE_CLIENT_SECRET,
-    scope=['https://www.googleapis.com/auth/userinfo.email',
-          'https://www.googleapis.com/auth/userinfo.profile'],
-    # Indicates whether the app can refresh access tokens when the user is not present at the browser
-    # "Enable offline access so that you can refresh an access token without re-prompting the user for permission. Recommended for web server apps."
-    offline=True,
-    #Uses the offline access to automatically refresh the authorization session
-    reprompt_consent=True
-)
-application.register_blueprint(google_blueprint, url_prefix="/login")
-
-
+# google_blueprint = make_google_blueprint(
+#     client_id=GOOGLE_CLIENT_ID,
+#     client_secret=GOOGLE_CLIENT_SECRET,
+#     scope=['https://www.googleapis.com/auth/userinfo.email',
+#           'https://www.googleapis.com/auth/userinfo.profile'],
+#     # Indicates whether the app can refresh access tokens when the user is not present at the browser
+#     # "Enable offline access so that you can refresh an access token without re-prompting the user for permission. Recommended for web server apps."
+#     offline=True,
+#     #Uses the offline access to automatically refresh the authorization session
+#     reprompt_consent=True
+# )
+# application.register_blueprint(google_blueprint, url_prefix="/login")
 
 def validate_login(func):
     def wrapper(*args, **kwargs):
         #if user has a valid login cookie, let them log in
-
+        token = session.get('site_token', None)
+        if token and check_token(token):
+            return func(*args, **kwargs)
         #otherwise, check if google authorized
-
-        if not google.authorized:
-            return redirect(url_for("google.login"))
-        try:
-            resp = google.get("/oauth2/v2/userinfo")
-            assert resp.ok, resp.text
-        except (AssertionError, InvalidClientIdError, InvalidGrantError):
-            return redirect(url_for("google.login"))
+        # elif not google.authorized:
+        #     return redirect(url_for("google.login"))
+        # try:
+        #     resp = google.get("/oauth2/v2/userinfo")
+        #     assert resp.ok, resp.text
+        # except (AssertionError, InvalidClientIdError, InvalidGrantError):
+        #     return redirect(url_for("google.login"))
+        return "You must be logged in to perform this action"
     wrapper.func_name = func.func_name
     return wrapper
+
+
+def issue_token(name, email, id):
+    payload = {
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, minutes=30),
+        'iat': datetime.datetime.utcnow(),
+        'sub': id,
+        'name': name,
+        'email': email
+    }
+    session['site_token'] = jwt.encode(
+        payload,
+        APP_SECRET,
+        algorithm='HS256'
+    )
+
+
+def check_token(token):
+    try:
+        payload = jwt.decode(token, APP_SECRET)
+    except (jwt.ExpiredSignatureError):
+        return False
+    return True
+
+@application.route('/buy', methods=['POST'])
+@validate_login
+def buy():
+    return "You bought something"
+
+@application.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return "You have logged out"
+
+@application.route('/login', methods=['POST'])
+def login():
+    email = request.args.get('email', '')
+    password = request.args.get('password', '').encode('utf-8')
+    user = db.session.query(User.name, User.email, User.id, User.key).filter(User.email == email).first()
+
+    if user and bcrypt.checkpw(password, user.key.encode('utf-8')):
+        issue_token(user.name, user.email, user.id)
+        return "Logged in"
+    return "No user exists for this email/password"
 
 @application.route('/register', methods=['POST'])
 def register():
@@ -86,5 +132,8 @@ def register():
 
     newUser = User(name=params['Name'], email=params['Email'], password=params['Password'])
     db.session.add(newUser)
+    db.session.flush()
+    db.session.refresh(newUser)
     db.session.commit()
+    issue_token(newUser.name, newUser.email, newUser.id)
     return "Account successfully created"
