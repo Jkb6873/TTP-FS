@@ -104,13 +104,12 @@ def validate_login(func):
         # except (AssertionError, InvalidClientIdError, InvalidGrantError):
         #     return redirect(url_for("google.login"))
         return jsonify({"error":"You must be logged in to preform this action"}),403
-    wrapper.func_name = func.func_name
+    wrapper.__name__ = func.__name__
     return wrapper
-
 
 def issue_token(name, email, id):
     payload = {
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, minutes=30),
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, hours=2),
         'iat': datetime.datetime.utcnow(),
         'sub': id,
         'name': name,
@@ -182,12 +181,12 @@ def sell(userId):
         Transaction.type,
         func.sum(Transaction.count)
     ).filter(
-        Transaction.user_id == userId and Transaction.symbol == symbol
+        and_(Transaction.user_id == userId, Transaction.symbol == symbol)
     ).group_by(
         Transaction.type
     ).all())
 
-    total_stock = all_transactions['buy'] - all_transactions['sell']
+    total_stock = all_transactions.get('buy', 0) - all_transactions.get('sell', 0)
     if total_stock < count:
         return jsonify({"error":"You do not have this much stock"}), 400
 
