@@ -28,7 +28,7 @@ class User(db.Model):
     def __init__(self, name, email, password):
         self.key = bcrypt.hashpw(
             password.encode("utf-8"), bcrypt.gensalt(14)
-        )
+        ).decode('utf-8')
         self.name = name
         self.email = email
         self.funds = 5000.00
