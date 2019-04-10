@@ -6,7 +6,7 @@ import jwt
 import requests
 
 
-from flask import Flask, request, session, jsonify
+from flask import Flask, request, session, jsonify, json
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text, or_, func, and_
@@ -57,6 +57,23 @@ class Transaction(db.Model):
     cost = db.Column(db.Numeric(precision=2, asdecimal=True), unique=False, nullable=False)
     count = db.Column(db.Integer, unique=False, nullable=False)
     type = db.Column(db.Enum(*("buy", "sell"), name="txn_type"), nullable=False)
+
+class CustomEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Decimal):
+            return str(obj)
+        if isinstance(obj, Transaction):
+            output = {
+                'symbol': obj.symbol,
+                'type': obj.type,
+                'cost': obj.cost,
+                'count': obj.count,
+                'purchase_date': obj.purchase_date
+            }
+            return output
+        return super(CustomEncoder, self).default(obj)
+application.json_encoder = CustomEncoder
+
 
 # google_blueprint = make_google_blueprint(
 #     client_id=GOOGLE_CLIENT_ID,
@@ -178,7 +195,13 @@ def sell(userId):
     txn = Transaction(userId, symbol, count, cost, 'sell')
     db.session.add(txn)
     db.session.commit()
-    return jsonify({"success": True, "balance": float(user.funds)}), 200
+    return jsonify({"success": True, "balance": str(user.funds)}), 200
+
+@application.route('/transactions', methods=['GET'])
+@validate_login
+def transaction_list(userId):
+    all_transactions = db.session.query(Transaction).filter(Transaction.user_id == userId).all()
+    return jsonify(all_transactions), 200
 
 @application.route('/login', methods=['POST'])
 def login():
