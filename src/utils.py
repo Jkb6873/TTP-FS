@@ -1,7 +1,7 @@
 import jwt
 import datetime
 from flask import json, session
-from . import APP_SECRET
+from .config import APP_SECRET
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, obj):
