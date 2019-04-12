@@ -1,15 +1,15 @@
 import requests
 import bcrypt
 
-from decimal import Decimal
-from sqlalchemy.sql import func, and_
-from sqlalchemy import exists
 from flask import request, session, jsonify
+from decimal import Decimal
+from sqlalchemy import exists
+from sqlalchemy.sql import func, and_
 
 from . import api
+from ..utils import validate_login, issue_token, check_token
 from ..config import IEX_PREFIX
 from ..database import db
-from ..utils import validate_login, issue_token, check_token
 from ..database.models import Transaction, User
 
 @api.route('/buy', methods=['POST'])
