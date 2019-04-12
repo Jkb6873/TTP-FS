@@ -3,6 +3,7 @@ import datetime
 from flask import json, session
 from decimal import Decimal
 from .config import APP_SECRET
+from .database.models import Transaction
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, obj):
