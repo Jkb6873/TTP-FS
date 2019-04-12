@@ -1,6 +1,7 @@
 import jwt
 import datetime
 from flask import json, session
+from decimal import Decimal
 from .config import APP_SECRET
 
 class CustomEncoder(json.JSONEncoder):
