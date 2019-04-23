@@ -1,7 +1,6 @@
 import os
 
-# GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
-# GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
 APP_SECRET = os.environ.get("APP_SECRET")
 SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
 IEX_PREFIX = os.environ.get("IEX_PREFIX")
+# TEMPLATE_FOLDER = os.path.join(os.path.dirname(__file__), 'static')

@@ -1,0 +1,11 @@
+#portfolio{
+  display: flex;
+}
+
+td {
+  padding: 0px 15px;
+}
+
+tr:hover {
+  background-color: #EEEEEE
+}

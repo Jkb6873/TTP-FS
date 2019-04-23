@@ -1,6 +1,6 @@
 import jwt
 import datetime
-from flask import json, session
+from flask import json, session, jsonify, render_template
 from decimal import Decimal
 from .config import APP_SECRET
 from .database.models import Transaction
@@ -22,20 +22,11 @@ class CustomEncoder(json.JSONEncoder):
 
 def validate_login(func):
     def wrapper(*args, **kwargs):
-        #if user has a valid login cookie, let them log in
         token = session.get('site_token', None)
         id = check_token(token)
         if token and id:
             return func(*args, **dict(kwargs, userId=id))
-        #otherwise, check if google authorized
-        # elif not google.authorized:
-        #     return redirect(url_for("google.login"))
-        # try:
-        #     resp = google.get("/oauth2/v2/userinfo")
-        #     assert resp.ok, resp.text
-        # except (AssertionError, InvalidClientIdError, InvalidGrantError):
-        #     return redirect(url_for("google.login"))
-        return jsonify({"error":"You must be logged in to preform this action"}),403
+        return render_template('login.html'), 403
     wrapper.__name__ = func.__name__
     return wrapper
 
@@ -56,6 +47,6 @@ def issue_token(name, email, id):
 def check_token(token):
     try:
         payload = jwt.decode(token, APP_SECRET)
-    except (jwt.ExpiredSignatureError):
+    except (jwt.ExpiredSignatureError, jwt.DecodeError):
         return False
     return payload['sub']

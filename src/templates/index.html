@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head lang="en">
+    <meta charset="UTF-8">
+    <title>Flask React</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename="css/main.css")}}">
+  </head>
+  <body>
+    <button onclick="window.location='/logout';">Log Out</button>
+    <button id="buy">Buy Stock</button>
+    <button id="sell">Sell Stock</button>
+
+    <div id="portfolio">
+      <table id="portfolioStats"></table>
+      <canvas id="pieChart" width="200" height="200"></canvas>
+    </div>
+    <div id="transactions"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.js"></script>
+    <script src="{{ url_for('static', filename="js/app.js")}}" type="text/javascript"></script>
+  </body>
+</html>

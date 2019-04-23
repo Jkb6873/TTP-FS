@@ -1,21 +1,26 @@
 import requests
 import bcrypt
 
-from flask import request, session, jsonify
+from flask import request, session, jsonify, render_template, redirect, url_for
 from decimal import Decimal
 from sqlalchemy import exists
 from sqlalchemy.sql import func, and_
 
 from . import api
-from ..utils import validate_login, issue_token, check_token
+from ..utils import validate_login, issue_token
 from ..config import IEX_PREFIX
 from ..database import db
 from ..database.models import Transaction, User
 
+@api.route('/', methods=['GET'])
+@validate_login
+def show(userId):
+    return render_template('index.html')
+
 @api.route('/buy', methods=['POST'])
 @validate_login
 def buy(userId):
-    symbol = request.args.get('symbol', '')
+    symbol = request.args.get('symbol', '').lower()
 
     try:
         count = int(request.args.get('count', 1))
@@ -44,7 +49,7 @@ def buy(userId):
 @api.route('/sell', methods=['POST'])
 @validate_login
 def sell(userId):
-    symbol = request.args.get('symbol', '')
+    symbol = request.args.get('symbol', '').lower()
 
     try:
         count = int(request.args.get('count', 1))
@@ -94,13 +99,13 @@ def login():
 
     if user and bcrypt.checkpw(password, user.key.encode('utf-8')):
         issue_token(user.name, user.email, user.id)
-        return jsonify({"success":True}),200
+        return jsonify({"success": True}), 200
     return jsonify({"error":"No user exists for this email/password"}),403
 
-@api.route('/logout', methods=['POST'])
+@api.route('/logout', methods=['GET'])
 def logout():
     session.clear()
-    return jsonify({"success":True}),200
+    return render_template('login.html', message="Successfully logged out"),200
 
 @api.route('/register', methods=['POST'])
 def register():

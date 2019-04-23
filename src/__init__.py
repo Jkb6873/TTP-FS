@@ -1,6 +1,6 @@
 import os
 
-from .config import APP_SECRET, SQLALCHEMY_DATABASE_URI
+from .config import APP_SECRET, SQLALCHEMY_DATABASE_URI#, TEMPLATE_FOLDER
 from .utils import CustomEncoder
 from .routes.controller import api
 from .database import db
@@ -11,6 +11,7 @@ def create_app():
     app.secret_key = APP_SECRET
     app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URI
     app.json_encoder = CustomEncoder
+    # app.template_folder = TEMPLATE_FOLDER
     app.register_blueprint(api)
     db.init_app(app)
     return app
