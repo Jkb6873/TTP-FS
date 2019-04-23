@@ -14,20 +14,40 @@
     <form>
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" class="form-control" required="required" name="email" id="email" placeholder="eg jsmith@email.com">
+        <input type="email" class="form-control" required="required" name="email" id="signInEmail" placeholder="eg jsmith@email.com">
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" class="form-control" name="password"  id="password">
+        <input type="password" class="form-control" name="password"  id="signInPass">
       </div>
 
       <button onclick="return submitLogin()">Log In</button>
+    </form>
+
+      <form>
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" class="form-control" name="name"  id="name" placeholder="eg John Smith">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" class="form-control" required="required" name="registerEmail" id="email" placeholder="eg jsmith@email.com">
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" name="password"  id="registerPass">
+        </div>
+
+        <button onclick="return submitAccount()">Register</button>
+      </form>
       <script>
         function submitLogin(){
           let params = {
-            "email": document.getElementById('email').value,
-            "password": document.getElementById('password').value
+            "email": document.getElementById('signInEmail').value,
+            "password": document.getElementById('signInPass').value
           }
 
           let query = Object.keys(params).map(
@@ -35,6 +55,24 @@
           ).join('&');
 
           res = fetch("/login?" + query, {
+            method:"POST",
+            headers:{
+              "Content-Type": "application/json"
+            }
+          })
+          return false
+        }
+        function submitAccount(){
+          let params = {
+            "email": document.getElementById('registerEmail').value,
+            "password": document.getElementById('registerPass').value
+          }
+
+          let query = Object.keys(params).map(
+            k => encodeURIComponent(k) + '=' + encodeURIComponent(params[k])
+          ).join('&');
+
+          res = fetch("/register?" + query, {
             method:"POST",
             headers:{
               "Content-Type": "application/json"
