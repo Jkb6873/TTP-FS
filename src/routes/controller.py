@@ -1,7 +1,7 @@
 import requests
 import bcrypt
 
-from flask import request, session, jsonify, render_template, redirect, url_for
+from flask import request, session, jsonify, render_template, redirect, url_for, make_response
 from decimal import Decimal
 from sqlalchemy import exists
 from sqlalchemy.sql import func, and_
@@ -13,8 +13,7 @@ from ..database import db
 from ..database.models import Transaction, User
 
 @api.route('/', methods=['GET'])
-@validate_login
-def show(userId):
+def show():
     return render_template('index.html')
 
 @api.route('/buy', methods=['POST'])
@@ -98,8 +97,10 @@ def login():
     user = db.session.query(User.name, User.email, User.id, User.key).filter(User.email == email).first()
 
     if user and bcrypt.checkpw(password, user.key.encode('utf-8')):
-        issue_token(user.name, user.email, user.id)
-        return jsonify({"success": True}), 200
+        resp = jsonify({"success": True})
+        resp.status = 200
+        resp.set_cookie(issue_token(newUser.name, newUser.email, newUser.id))
+        return resp
     return jsonify({"error":"No user exists for this email/password"}),403
 
 @api.route('/logout', methods=['GET'])
@@ -129,5 +130,6 @@ def register():
     db.session.flush()
     db.session.refresh(newUser)
     db.session.commit()
-    issue_token(newUser.name, newUser.email, newUser.id)
-    return jsonify({"success":True}),200
+    resp = make_response(jsonify({"success": True}), 200)
+    resp.set_cookie(issue_token(newUser.name, newUser.email, newUser.id))
+    return resp
