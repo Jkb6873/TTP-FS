@@ -6,3 +6,6 @@
 env.sh
 *.pyc
 __pycache__
+src/frontend/build/
+src/frontend/node_modules/
+*.log

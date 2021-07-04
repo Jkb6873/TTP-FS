@@ -1,6 +1,6 @@
 import jwt
 import datetime
-from flask import json, session, jsonify, render_template
+from flask import json, session, jsonify, render_template, make_response
 from decimal import Decimal
 from .config import APP_SECRET
 from .database.models import Transaction
@@ -22,11 +22,13 @@ class CustomEncoder(json.JSONEncoder):
 
 def validate_login(func):
     def wrapper(*args, **kwargs):
-        token = session.get('site_token', None)
+        token = request.cookies.get('site_token', None)
         id = check_token(token)
         if token and id:
             return func(*args, **dict(kwargs, userId=id))
-        return render_template('login.html'), 403
+        resp = make_response(render_template('index.html'), status=403)
+        resp.set_cookie('site_token', '', expires=0)
+        return resp
     wrapper.__name__ = func.__name__
     return wrapper
 
@@ -38,7 +40,7 @@ def issue_token(name, email, id):
         'name': name,
         'email': email
     }
-    session['site_token'] = jwt.encode(
+    return jwt.encode(
         payload,
         APP_SECRET,
         algorithm='HS256'
